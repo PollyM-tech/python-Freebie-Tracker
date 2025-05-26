@@ -3,16 +3,6 @@ Generic single-database configuration.
 
 A Python application to track freebies (swag) collected by developers from companies at hackathons and events.
 
-## Overview 
-The Freebie Tracker manages relationships between three main entities:
-
-Companies that give out freebies
-Developers who collect freebies
-Freebies as the connecting items between companies and developers
-
-## Database Schema
-[View DB Diagram](https://dbdiagram.io/d/68343a530240c65c4438b599)
-
 ## Entity Relationships
 
 Company ↔ Dev: Many-to-Many (through Freebies)
@@ -20,51 +10,48 @@ Company → Freebie: One-to-Many
 Dev → Freebie: One-to-Many
 Freebie: Belongs to both a Company and a Dev
 
+Summary
 
-### Core Relationships
-| Relationship | Type | Description |
-|--------------|------|-------------|
-| Company ↔ Dev | Many-to-Many | Through Freebie records |
-| Company → Freebie | One-to-Many | Company provides multiple freebies |
-| Dev → Freebie | One-to-Many | Developer collects multiple freebies |
+| Entity   | Fields                      |
+|----------|-----------------------------|
+| Company  | `id`, `name`, `founding_year` |
+| Dev      | `id`, `name`               |
+| Freebie  | `id`, `item_name`, `value`, `dev_id`, `company_id` |
 
-## 🛠️ Quick Start
-
-## installation
+[View DB Diagram](https://dbdiagram.io/d/68343a530240c65c4438b599)
 
 ## Install dependencies
 pipenv install && pipenv shell
 
 # Initialize database
 alembic upgrade head
-python seed.py  # Optional sample data
+python seed.py  *sample data
 
 ## Usage
 Start the interactive console:
 python debug.py
 
--queries to use 
- Get the oldest company
-oldest = Company.oldest_company(session)
-print(f"Oldest company: {oldest.name}")
+-Oldest company
+Company.oldest_company(session).name  # => "Lintech"
 
 -Give a new freebie
 company = session.query(Company).first()
 dev = session.query(Dev).first()
 company.give_freebie(dev, "Sticker Pack", 5, session)
+session.commit()
 
--Check if dev received item
-print(dev.received_one("Sticker Pack"))  # True/False
+-Check if dev received a specific item
+dev.received_one("Sticker Pack")  # => True
 
--Transfer freebie
-freebie = session.query(Freebie).first()
+-Transfer freebie from one dev to another
+freebie = session.query(Freebie).filter_by(item_name="Sticker Pack").first()
+new_dev = session.query(Dev).filter_by(name="Daniel").first()
 dev.give_away(new_dev, freebie, session)
 
-- Print freebie details
-print(freebie.print_details())
-# "Kylian owns a backpack from TechPolly"
+-Print details
+print(freebie.print_details())  # => "Daniel owns a Sticker Pack from TechPolly"
 
-## Models
+-Models
 Company: Has many freebies through freebies table
 
 Dev: Has many freebies and companies through freebies table
@@ -72,10 +59,31 @@ Dev: Has many freebies and companies through freebies table
 Freebie: Belongs to both a company and a dev
 
 ## Methods
-Class	Methods
-Company	give_freebie(), oldest_company()
-Dev	received_one(), give_away()
-Freebie	print_details()
+Company
+give_freebie(dev, item_name, value, session)
+oldest_company(session) → Company
+
+Dev
+received_one(item_name) → bool
+give_away(new_dev, freebie, session) → boolean
+
+Freebie
+print_details() → str
+
+## Notes
+-Uses association_proxy for many-to-many shortcut access.
+
+-Migrations handled via Alembic.
+
+-Sample data included in seed.py for testing relationships.
+
+## File structure
+├── models.py         # SQLAlchemy models & relationships
+├── seed.py           # Populates database
+├── debug.py          # Starts an interactive console
+├── alembic/          # Migrations directory
+├── README.md         # Project documentation
+└── freebies.db       # SQLite database
 
 License
 MIT © [Pauline Moraa]
