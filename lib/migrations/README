@@ -1,2 +1,81 @@
 Generic single-database configuration.
+# Freebie Tracker 🎁
 
+A Python application to track freebies (swag) collected by developers from companies at hackathons and events.
+
+## Overview 
+The Freebie Tracker manages relationships between three main entities:
+
+Companies that give out freebies
+Developers who collect freebies
+Freebies as the connecting items between companies and developers
+
+## Database Schema
+[View DB Diagram](https://dbdiagram.io/d/68343a530240c65c4438b599)
+
+## Entity Relationships
+
+Company ↔ Dev: Many-to-Many (through Freebies)
+Company → Freebie: One-to-Many
+Dev → Freebie: One-to-Many
+Freebie: Belongs to both a Company and a Dev
+
+
+### Core Relationships
+| Relationship | Type | Description |
+|--------------|------|-------------|
+| Company ↔ Dev | Many-to-Many | Through Freebie records |
+| Company → Freebie | One-to-Many | Company provides multiple freebies |
+| Dev → Freebie | One-to-Many | Developer collects multiple freebies |
+
+## 🛠️ Quick Start
+
+## installation
+
+## Install dependencies
+pipenv install && pipenv shell
+
+# Initialize database
+alembic upgrade head
+python seed.py  # Optional sample data
+
+## Usage
+Start the interactive console:
+python debug.py
+
+-queries to use 
+ Get the oldest company
+oldest = Company.oldest_company(session)
+print(f"Oldest company: {oldest.name}")
+
+-Give a new freebie
+company = session.query(Company).first()
+dev = session.query(Dev).first()
+company.give_freebie(dev, "Sticker Pack", 5, session)
+
+-Check if dev received item
+print(dev.received_one("Sticker Pack"))  # True/False
+
+-Transfer freebie
+freebie = session.query(Freebie).first()
+dev.give_away(new_dev, freebie, session)
+
+- Print freebie details
+print(freebie.print_details())
+# "Kylian owns a backpack from TechPolly"
+
+## Models
+Company: Has many freebies through freebies table
+
+Dev: Has many freebies and companies through freebies table
+
+Freebie: Belongs to both a company and a dev
+
+## Methods
+Class	Methods
+Company	give_freebie(), oldest_company()
+Dev	received_one(), give_away()
+Freebie	print_details()
+
+License
+MIT © [Pauline Moraa]

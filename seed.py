@@ -15,17 +15,21 @@ if __name__ == '__main__':
     session.query(Company).delete()
     session.commit()
 
+    # Creating Companies
     company1 = Company(name="TechPolly", founding_year=2023)
     company2 = Company(name="Lintech", founding_year=2020)
     session.add_all([company1, company2])
+    session.commit()
 
+    # Creating Developers
     dev1 = Dev(name="Kylian")
     dev2 = Dev(name="Daniel")
     session.add_all([dev1, dev2])
+    session.commit()
 
-    freebie1 = Freebie(item_name="backpack", value=10, dev=dev1, company=company1)
-    freebie2 = Freebie(item_name="waterbottle", value=4, dev=dev1, company=company2)
-    freebie3 = Freebie(item_name="Mug", value=8, dev=dev2, company=company1)
-    session.add_all([freebie1, freebie2, freebie3])
+    # Creating Freebies
+    freebie1 = company1.give_freebie(dev1, "backpack", 10, session)
+    freebie2 = company1.give_freebie(dev2, "waterbottle", 4, session)
+    freebie3 = company2.give_freebie(dev1, "mug", 8, session)
 
     session.commit()
